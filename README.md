@@ -28,7 +28,7 @@ I want to extend a warm and deep thanks to Marc Grabanski and the entire Fronten
 I recommend reading the **second edition** books in this order:
 
 * [Get Started](get-started/README.md) | [Buy on Leanpub](https://leanpub.com/ydkjsy-get-started) | [Buy on Amazon](https://www.amazon.com/dp/B084BNMN7T)
-* [Scope & Closures](scope-closures/README.md) | [Buy on Leanpub](https://leanpub.com/ydkjsy-scope-closures) | [Buy on Amazon](https://www.amazon.com/dp/B08634PZ3N)
+* [作用域和闭包](scope-closures/README.md) | [Buy on Leanpub](https://leanpub.com/ydkjsy-scope-closures) | [Buy on Amazon](https://www.amazon.com/dp/B08634PZ3N)
 * Objects & Classes (not yet started)
 * Types & Grammar (not yet started)
 * Sync & Async (not yet started)
