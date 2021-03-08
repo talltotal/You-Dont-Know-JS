@@ -1,18 +1,18 @@
-# You Don't Know JS Yet: Scope & Closures - 2nd Edition
+# You Don't Know JS Yet: 作用域和闭包 - 2nd Edition
 
 <img src="images/cover.png" width="300">
 
 -----
 
-**[Purchase ebook/PDF from Leanpub](https://leanpub.com/ydkjsy-scope-closures)**
+**[在Leanpub购买电子书/PDF](https://leanpub.com/ydkjsy-scope-closures)**
 
 -----
 
-[Table of Contents](toc.md)
+[目录](toc.md)
 
-* [Foreword](foreword.md) (by [Sarah Drasner](https://sarah.dev/))
-* [Preface](../preface.md)
-* [Chapter 1: What's the Scope?](ch1.md)
+* [序](foreword.md) (by [Sarah Drasner](https://sarah.dev/))
+* [引言](../preface.md)
+* [第一章：什么是作用域？](ch1.md)
 * [Chapter 2: Illustrating Lexical Scope](ch2.md)
 * [Chapter 3: The Scope Chain](ch3.md)
 * [Chapter 4: Around the Global Scope](ch4.md)

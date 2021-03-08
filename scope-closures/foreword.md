@@ -1,5 +1,5 @@
-# You Don't Know JS Yet: Scope & Closures - 2nd Edition
-# Foreword
+# You Don't Know JS Yet: 作用域和闭包 - 2nd Edition
+# 序
 
 If I look over the books on my bookshelf, I can clearly see which of these titles are well loved. Well loved in this sense meaning they are a little worn. Their binding is broken, their pages are tattered, there might even be a spilled drink smear or two. What’s ironic to me is that the most loved of my books often _**look**_ the least cared for, though honestly the opposite is true.
 

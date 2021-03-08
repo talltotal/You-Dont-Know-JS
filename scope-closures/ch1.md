@@ -1,35 +1,35 @@
-# You Don't Know JS Yet: Scope & Closures - 2nd Edition
-# Chapter 1: What's the Scope?
+# You Don't Know JS Yet: 作用域和闭包 - 第二版
+# 第一章：什么是作用域？
 
-By the time you've written your first few programs, you're likely getting somewhat comfortable with creating variables and storing values in them. Working with variables is one of the most foundational things we do in programming!
+当你刚开始编写程序时，你就会很自然地喜欢创建变量并把值存在变量上。使用变量是我们编程中最基础的事情之一！
 
-But you may not have considered very closely the underlying mechanisms used by the engine to organize and manage these variables. I don't mean how the memory is allocated on the computer, but rather: how does JS know which variables are accessible by any given statement, and how does it handle two variables of the same name?
+但是你可能没有非常仔细地考虑过引擎组织和管理这些变量的底层机制。我不是指计算机是如果分配内存的，而是：JS如何知晓在给定的语句中有哪些变量可以访问，以及如何处理两个具有相同名称的变量。
 
-The answers to questions like these take the form of well-defined rules called scope. This book will dig through all aspects of scope—how it works, what it's useful for, gotchas to avoid—and then point toward common scope patterns that guide the structure of programs.
+此类问题的答案需要一组明确定义的规则叫做作用域。本书将深入探讨作用域的各个方面——工作原理、作用、应避免的陷阱——然后直指影响程序结构的通用作用域模式。
 
-Our first step is to uncover how the JS engine processes our program **before** it runs.
+我们的第一步是揭示JS引擎在运行程序**之前**对它做了哪些处理。
 
-## About This Book
+## 关于这本书
 
 Welcome to book 2 in the *You Don't Know JS Yet* series! If you already finished *Get Started* (the first book), you're in the right spot! If not, before you proceed I encourage you to *start there* for the best foundation.
 
-Our focus will be the first of three pillars in the JS language: the scope system and its function closures, as well as the power of the module design pattern.
+我们的重点将是JS语言的三大支柱之首：作用域系统、其函数闭包、模块设计模式的强大功能。
 
-JS is typically classified as an interpreted scripting language, so it's assumed by most that JS programs are processed in a single, top-down pass. But JS is in fact parsed/compiled in a separate phase **before execution begins**. The code author's decisions on where to place variables, functions, and blocks with respect to each other are analyzed according to the rules of scope, during the initial parsing/compilation phase. The resulting scope structure is generally unaffected by runtime conditions.
+JS通常被归类为一种解释型脚本语言，因此大多数人都认为JS程序是通过单次地、从上至下地处理的。但实际上，**在执行开始之前**，JS会在单独的阶段中进行解析/编译。在这个阶段，引擎将根据作用域规则，分析代码作者对变量、函数、块如何相互‘respect’地放置的设计。生成的作用域结构通常不受运行时条件的影响。
 
-JS functions are themselves first-class values; they can be assigned and passed around just like numbers or strings. But since these functions hold and access variables, they maintain their original scope no matter where in the program the functions are eventually executed. This is called closure.
+JS函数本身就是 ‘first-class’ 值；它们可以像数值或字符串一样被赋值、传递。但这些函数可以持有和接收变量，无论在程序的什么位置执行都保持原本的作用域。这称为闭包。
 
-Modules are a code organization pattern characterized by public methods that have privileged access (via closure) to hidden variables and functions in the internal scope of the module.
+模块是一种代码组织模式，其特点是，使用公共方法（通过闭包）访问模块作用域内的变量和函数。
 
-## Compiled vs. Interpreted
+## 编译型 vs. 解释型
 
-You may have heard of *code compilation* before, but perhaps it seems like a mysterious black box where source code slides in one end and executable programs pop out the other.
+您可能以前听说过*代码编译*，但它可能看起来像一个神秘的黑盒子，源码从一端进入然后从另一端输出可执行程序。
 
-It's not mysterious or magical, though. Code compilation is a set of steps that process the text of your code and turn it into a list of instructions the computer can understand. Typically, the whole source code is transformed at once, and those resulting instructions are saved as output (usually in a file) that can later be executed.
+其实它并不神秘或神奇。代码编译就是处理代码文本并转换为计算机可理解的指令列表的一组步骤。通常，整个源码会一起进行转换，然后将得到的指令另存为输出（通常存储在文件中），以便之后执行。
 
-You also may have heard that code can be *interpreted*, so how is that different from being *compiled*?
+您可能还听说过代码可以*解释*，那么它和*编译*有何不同？
 
-Interpretation performs a similar task to compilation, in that it transforms your program into machine-understandable instructions. But the processing model is different. Unlike a program being compiled all at once, with interpretation the source code is transformed line by line; each line or statement is executed before immediately proceeding to processing the next line of the source code.
+解释所执行的任务与编译类似，也就是将你们的程序转换为机器可理解的指令。但是它们的处理模型不同。不像上述的一次性编译完程序，解释是逐行转换源码的；在继续处理下一行源码之前，就会先执行已解释的行或语句。
 
 <figure>
     <img src="images/fig1.png" width="650" alt="Code Compilation and Code Interpretation" align="center">
@@ -39,51 +39,51 @@ Interpretation performs a similar task to compilation, in that it transforms you
 
 Figure 1 illustrates compilation vs. interpretation of programs.
 
-Are these two processing models mutually exclusive? Generally, yes. However, the issue is more nuanced, because interpretation can actually take other forms than just operating line by line on source code text. Modern JS engines actually employ numerous variations of both compilation and interpretation in the handling of JS programs.
+这两个处理模型是否互斥？一般来说，确实如此。但是，这个问题又很微妙，因为实际上解释可以采取其他形式，而不仅仅是对源码文本的逐行操作。实际上，现代JS引擎在处理JS程序时就会采用大量包括编译和解释的变体。
 
-Recall that we surveyed this topic in Chapter 1 of the *Get Started* book. Our conclusion there is that JS is most accurately portrayed as a **compiled language**. For the benefit of readers here, the following sections will revisit and expand on that assertion.
+回想一下，在《入门》一书的第一章中，我们评述过这个话题。我们的结论是，将JS描述为一种**编译型语言**是最准确的。为了读者的‘benefit’，以下各节将重新讨论并扩展此主张。
 
-## Compiling Code
+## 编译代码
 
-But first, why does it even matter whether JS is compiled or not?
+但是首先，为什么辩证JS是否为编译型会很重要呢？
 
-Scope is primarily determined during compilation, so understanding how compilation and execution relate is key in mastering scope.
+作用域主要是在编译期间确定的，所以理解编译和执行之间的关系是掌握作用域的关键。
 
-In classic compiler theory, a program is processed by a compiler in three basic stages:
+在经典的编译器理论中，编译器以以下三个基本阶段处理程序：
 
-1. **Tokenizing/Lexing:** breaking up a string of characters into meaningful (to the language) chunks, called tokens. For instance, consider the program: `var a = 2;`. This program would likely be broken up into the following tokens: `var`, `a`, `=`, `2`, and `;`. Whitespace may or may not be persisted as a token, depending on whether it's meaningful or not.
+1. **分词/词法分析：** 将一连串字符打断成（对于语言来说）有意义的片段，称为 token（记号）。举例来说，考虑这段程序：`var a = 2;`。这段程序很可能会被打断成这些 token： `var`, `a`, `=`, `2` 和 `;`。空格可能会被保留为一个 token，也可能不会，这取决于它是否有意义。
 
-    (The difference between tokenizing and lexing is subtle and academic, but it centers on whether or not these tokens are identified in a *stateless* or *stateful* way. Put simply, if the tokenizer were to invoke stateful parsing rules to figure out whether `a` should be considered a distinct token or just part of another token, *that* would be **lexing**.)
+    （分词和词法分析之间的区别是微妙和学术上的，其核心在于这些 token 是否以 *无状态* 或 *有状态* 的方式被识别。简而言之，如果分词器需要调用有状态的解析规则来确定`a`是否应当被考虑为一个独立的 token，还是只是其他 token 的一部分，那么*这*就是 **词法分析**。）
 
-2. **Parsing:** taking a stream (array) of tokens and turning it into a tree of nested elements, which collectively represent the grammatical structure of the program. This is called an Abstract Syntax Tree (AST).
+2. **解析：** 将一个 token 的流（数组）转换为一个嵌套元素的树，它综合地表示了程序的语法结构。这棵树称为“抽象语法树”（AST —— **A**bstract **S**yntax **T**ree）。
 
-    For example, the tree for `var a = 2;` might start with a top-level node called `VariableDeclaration`, with a child node called `Identifier` (whose value is `a`), and another child called `AssignmentExpression` which itself has a child called `NumericLiteral` (whose value is `2`).
+    例如，`var a = 2;` 的树也许开始于称为 `VariableDeclaration`（变量声明）顶层节点，带有一个称为 `Identifier`（标识符）的子节点（它的值为 `a`），和另一个称为 `AssignmentExpression`（赋值表达式）的子节点，而这个子节点本身带有一个称为 `NumericLiteral`（数字字面量）的子节点（它的值为`2`）。
 
-3. **Code Generation:** taking an AST and turning it into executable code. This part varies greatly depending on the language, the platform it's targeting, and other factors.
+3. **代码生成：** 将抽象语法树转换为可执行的代码。这部分内容会根据语言，目标平台和其他因素有很大差异。
 
-    The JS engine takes the just described AST for `var a = 2;` and turns it into a set of machine instructions to actually *create* a variable called `a` (including reserving memory, etc.), and then store a value into `a`.
+    JS引擎将刚刚描述的 `var a = 2;` 的AST转换为机器指令，可实际 *创建* 一个称为 `a` 的变量（包括分配内存等等），然后在 `a` 中存入一个值。
 
-| NOTE: |
+| 注意： |
 | :--- |
-| The implementation details of a JS engine (utilizing system memory resources, etc.) is much deeper than we will dig here. We'll keep our focus on the observable behavior of our programs and let the JS engine manage those deeper system-level abstractions. |
+| JS引擎的实现细节（利用系统内存资源等）比我们在这里探讨的要深得多。我们将持续关注我们程序可观察的行为，由JS引擎来管理这些更深的系统层的抽象。 |
 
-The JS engine is vastly more complex than *just* these three stages. In the process of parsing and code generation, there are steps to optimize the performance of the execution (i.e., collapsing redundant elements). In fact, code can even be re-compiled and re-optimized during the progression of execution.
+JS引擎要比这*区区*三步复杂太多了。例如，在解析和代码生成的处理中，存在优化执行效率的步骤（如压缩冗余元素）。实际上，代码甚至可以在执行过程中被重新编译和重新优化。
 
-So, I'm painting only with broad strokes here. But you'll see shortly why *these* details we *do* cover, even at a high level, are relevant.
+所以，我在此描绘的只是大框架。但是你很快就会明白为什么我们*要*提及的*这些*细节是重要的，虽然是在较高的层次上。
 
-JS engines don't have the luxury of an abundance of time to perform their work and optimizations, because JS compilation doesn't happen in a build step ahead of time, as with other languages. It usually must happen in mere microseconds (or less!) right before the code is executed. To ensure the fastest performance under these constraints, JS engines use all kinds of tricks (like JITs, which lazy compile and even hot re-compile); these are well beyond the "scope" of our discussion here.
+JS引擎没有大把的时间来执行它的工作和优化，因为JS的编译和其他语言不同，不是发生在一个提前的构建步骤中。它通常必须发生在执行代码前的仅仅几微秒之内（或更少！）。为了确保在这些约束条件下的最快性能，JS引擎使用了各种技巧（例如JIT，它可以懒编译甚至是热编译）；而这远超出了我们此处讨论的“作用域”。
 
-### Required: Two Phases
+### Required: 两个阶段
 
-To state it as simply as possible, the most important observation we can make about processing of JS programs is that it occurs in (at least) two phases: parsing/compilation first, then execution.
+为了尽可能简单地说明，关于JS程序的处理，我们能做的最重要的观察是它发生在（至少）两个阶段：首先是解析/编译，然后是执行。
 
-The separation of a parsing/compilation phase from the subsequent execution phase is observable fact, not theory or opinion. While the JS specification does not require "compilation" explicitly, it requires behavior that is essentially only practical with a compile-then-execute approach.
+解析/编译阶段与后续执行阶段的分离是可以观察到的事实，而不是理论或观点。尽管JS规范没有明确要求“编译”，但它要求的行为实质上只能使用“编译-然后-执行”方法才能实现。
 
-There are three program characteristics you can observe to prove this to yourself: syntax errors, early errors, and hoisting.
+你可以观察这三个程序特性来证明这一点：语法错误、Early Errors和声明提升。
 
-#### Syntax Errors from the Start
+#### 从一开始就抛出语法错误
 
-Consider this program:
+思考以下程序：
 
 ```js
 var greeting = "Hello";
@@ -94,13 +94,13 @@ greeting = ."Hi";
 // SyntaxError: unexpected token .
 ```
 
-This program produces no output (`"Hello"` is not printed), but instead throws a `SyntaxError` about the unexpected `.` token right before the `"Hi"` string. Since the syntax error happens after the well-formed `console.log(..)` statement, if JS was executing top-down line by line, one would expect the `"Hello"` message being printed before the syntax error being thrown. That doesn't happen.
+这个程序不会有任何输出（不会打印`"Hello"`），但是会抛出一个关于`"Hi"`字符串前预料外的`.`token的`SyntaxError`异常。由于语法错误发生在格式良好的`console.log(..)`语句之后，因此，如果JS是从上至下逐行执行的，就可以期望在抛出语法错误之前先打印`"Hello"`消息。这并没有发生。
 
-In fact, the only way the JS engine could know about the syntax error on the third line, before executing the first and second lines, is by the JS engine first parsing the entire program before any of it is executed.
+实际上，要JS引擎能在执行第一和第二行之前知道第三行有语法错误，唯一的方法就是JS引擎在执行任何程序之前先解析整个程序。
 
 #### Early Errors
 
-Next, consider:
+接下来，请思考：
 
 ```js
 console.log("Howdy");
@@ -115,19 +115,19 @@ function saySomething(greeting,greeting) {
 }
 ```
 
-The `"Howdy"` message is not printed, despite being a well-formed statement.
+尽管格式正确，但`"Howdy"`并未打印。
 
-Instead, just like the snippet in the previous section, the `SyntaxError` here is thrown before the program is executed. In this case, it's because strict-mode (opted in for only the `saySomething(..)` function here) forbids, among many other things, functions to have duplicate parameter names; this has always been allowed in non-strict-mode.
+相反，就像上一节中的代码片段一样，在程序执行之前抛出来`SyntaxError`错误。在这个案例中，是因为严格模式（这里只在`saySomething(..)`函数中启用）禁止函数拥有重复的参数名；这在非严格模式下通常是允许的。
 
-The error thrown is not a syntax error in the sense of being a malformed string of tokens (like `."Hi"` prior), but in strict-mode is nonetheless required by the specification to be thrown as an "early error" before any execution begins.
+这里抛出的错误不是因为令牌的字符串格式不正确（像前面的`."Hi"`）的语法错误。但是规范仍然要求在任何执行开始之前抛出严格模式下的“early error”。
 
-But how does the JS engine know that the `greeting` parameter has been duplicated? How does it know that the `saySomething(..)` function is even in strict-mode while processing the parameter list (the `"use strict"` pragma appears only later, in the function body)?
+但是JS引擎又要如何得知`greeting`参数已经重复了呢？它又如何在处理参数列表时得知`saySomething(..)`函数出于严格模式（`"use strict"`出现在函数体内，参数之后）？
 
-Again, the only reasonable explanation is that the code must first be *fully* parsed before any execution occurs.
+同样的，唯一可解释的理由就是代码一定是在执行发生之前被*完整地*解析了。
 
-#### Hoisting
+#### 声明提升
 
-Finally, consider:
+最后，请思考：
 
 ```js
 function saySomething() {
@@ -144,23 +144,23 @@ saySomething();
 // initialization
 ```
 
-The noted `ReferenceError` occurs from the line with the statement `greeting = "Howdy"`. What's happening is that the `greeting` variable for that statement belongs to the declaration on the next line, `let greeting = "Hi"`, rather than to the previous `var greeting = "Hello"` statement.
+注释中的`ReferenceError`发生在有`greeting = "Howdy"`语句的那行。这里的情况是，这条语句中的`greeting`变量不属性前面的`var greeting = "Hello"`语句，而是属于下一行`let greeting = "Hi"`声明语句。
 
-The only way the JS engine could know, at the line where the error is thrown, that the *next statement* would declare a block-scoped variable of the same name (`greeting`) is if the JS engine had already processed this code in an earlier pass, and already set up all the scopes and their variable associations. This processing of scopes and declarations can only accurately be accomplished by parsing the program before execution.
+JS引擎可以在抛出错误的那一行知道，*下一条语句*将声明一个具有相同名称的块作用域变量（`greeting`），这唯一的途径不就是JS引擎已经在较早的过程中处理过此代码，并且已经建立了所有作用域及其变量的关联。这种作用域和声明的处理只能通过执行前的程序解析来准确地完成。
 
-The `ReferenceError` here technically comes from `greeting = "Howdy"` accessing the `greeting` variable **too early**, a conflict referred to as the Temporal Dead Zone (TDZ). Chapter 5 will cover this in more detail.
+从技术上讲，这里的`ReferenceError`是因为`greeting = "Howdy"`**过早**地访问`greeting`变量，这是与称为临时死区（TDZ）的冲突。第5章将对此进行更详细的介绍。
 
-| WARNING: |
+| 警告： |
 | :--- |
-| It's often asserted that `let` and `const` declarations are not hoisted, as an explanation of the TDZ behavior just illustrated. But this is not accurate. We'll come back and explain both the hoisting and TDZ of `let`/`const` in Chapter 5. |
+| 经常有人断言`let`和`const`声明没有被提升，作为对TDZ行为的一种解释。但这是不准确的。我们将在第5章中解释声明提升和`let`/`const`的TDZ。 |
 
-Hopefully you're now convinced that JS programs are parsed before any execution begins. But does it prove they are compiled?
+希望现在你已经确信，JS程序在开始执行之前，已经解析过了。但这是否能证明它们已经被编译了呢？
 
-This is an interesting question to ponder. Could JS parse a program, but then execute that program by *interpreting* operations represented in the AST **without** first compiling the program? Yes, that is *possible*. But it's extremely unlikely, mostly because it would be extremely inefficient performance wise.
+这是一个有趣问题，值得思考。JS会在解析一个程序之后，**不**先编译程序，而是通过理解AST中的操作来执行代码吗？确实，有这种可能性。但这非常不可能，主要的因为是，这将会有极低的性能表现。
 
-It's hard to imagine a production-quality JS engine going to all the trouble of parsing a program into an AST, but not then converting (aka, "compiling") that AST into the most efficient (binary) representation for the engine to then execute.
+很难想象，一个生产品质的JS引擎克服所有解析程序的困难得到了AST，但是之后又不把AST转换（也就是“编译”）成效率最高的（二进制）表达形式，来让引擎做后续的执行。
 
-Many have endeavored to split hairs with this terminology, as there's plenty of nuance and "well, actually..." interjections floating around. But in spirit and in practice, what the engine is doing in processing JS programs is **much more alike compilation** than not.
+很多人就大量的细微差别试图钻这个术语的牛角尖，然后到处是“well, actually...”的感叹词。但是本质上以及事实上，引擎处理JS的过程确实**更像是编译**。
 
 Classifying JS as a compiled language is not concerned with the distribution model for its binary (or byte-code) executable representations, but rather in keeping a clear distinction in our minds about the phase where JS code is processed and analyzed; this phase observably and indisputedly happens *before* the code starts to be executed.
 
