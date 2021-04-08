@@ -59,7 +59,7 @@ Figure 1 illustrates compilation vs. interpretation of programs.
 
     例如，`var a = 2;` 的树也许开始于称为 `VariableDeclaration`（变量声明）顶层节点，带有一个称为 `Identifier`（标识符）的子节点（它的值为 `a`），和另一个称为 `AssignmentExpression`（赋值表达式）的子节点，而这个子节点本身带有一个称为 `NumericLiteral`（数字字面量）的子节点（它的值为`2`）。
 
-3. **代码生成：** 将抽象语法树转换为可执行的代码。这部分内容会根据语言，目标平台和其他因素有很大差异。
+3. **代码生成：** 将抽象语法树转换为可执行的代码。这部分内容会根据语言、目标平台和其他因素有很大差异。
 
     JS引擎将刚刚描述的 `var a = 2;` 的AST转换为机器指令，可实际 *创建* 一个称为 `a` 的变量（包括分配内存等等），然后在 `a` 中存入一个值。
 
